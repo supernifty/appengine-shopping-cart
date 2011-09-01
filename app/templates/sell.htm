@@ -8,7 +8,7 @@
 <p>
 <ul>
 {% for item in items %}
-  <li>{{ item.title }} for ${{ item.price_dollars|floatformat:2 }}</li>
+  <li>{{ item.title }} for ${{ item.price_dollars|floatformat:2 }} ({{ item.available }} available)</li>
 {% endfor %}
 </ul>
 </p>
@@ -17,11 +17,15 @@
 <br/>
 <form action="/sell/add/" method="post" enctype="multipart/form-data">
   <label for="title">Title:&nbsp; </label><input type="text" name="title"/><br/>
+  <label for="description">Description:&nbsp; </label><input type="text" name="description"/><br/>
   <label for="price">Price:&nbsp; </label><input type="text" name="price"/><br/>
   <label for="image">Image:&nbsp; </label><input type="file" name="image"/><br/>
+  <label for="available">Available:&nbsp; </label><input type="text" name="available"/><br/>
+{% if use_ebay %}
+  <strong>eBay</strong><br/>
+{% endif %}
   <input type="submit" value="Add Item"/>
 </form>
 </div>
 <p><a href="/sellhistory">Sales</a></p>
-<p>Your PayPal email is <strong>{{ paypal_email }}</strong>. <a href="/profile">Change</a>.</p>
 {% endblock %}

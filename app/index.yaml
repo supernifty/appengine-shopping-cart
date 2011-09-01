@@ -13,6 +13,11 @@ indexes:
 - kind: Item
   properties:
   - name: enabled
+  - name: available
+
+- kind: Item
+  properties:
+  - name: enabled
   - name: created
     direction: desc
 

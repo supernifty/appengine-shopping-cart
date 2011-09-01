@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<EndFixedPriceItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+  <ItemID>{{ item_id }}</ItemID>
+  <EndingReason>NotAvailable</EndingReason>
+  <RequesterCredentials>
+    <eBayAuthToken>{{ ebay_token }}</eBayAuthToken>
+  </RequesterCredentials>
+  <WarningLevel>High</WarningLevel>
+</EndFixedPriceItemRequest>

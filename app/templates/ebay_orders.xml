@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GetOrdersRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+  <RequesterCredentials>
+    <eBayAuthToken>{{ ebay_token }}</eBayAuthToken>
+  </RequesterCredentials>
+  <OrderIDArray> OrderIDArrayType
+    <OrderID>{{ item_id }}-{{ transaction_id }}</OrderID>
+  </OrderIDArray>
+  <OrderRole>Seller</OrderRole>
+  <OrderStatus>Active</OrderStatus>
+</GetOrdersRequest>

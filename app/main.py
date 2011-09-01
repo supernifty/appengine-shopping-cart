@@ -11,6 +11,7 @@ from google.appengine.ext.webapp import template
 from google.appengine.ext.webapp.util import login_required
 from google.appengine.ext.webapp.util import run_wsgi_app
 
+import ebay
 import model
 import paypal
 import settings
@@ -35,7 +36,7 @@ class RequestHandler(webapp.RequestHandler):
 class Home(RequestHandler):
   def get(self):
     data = {
-      'items': model.Item.recent(),
+      'items': model.Item.forsale(),
     }
     util.add_user( self.request.uri, data )
     path = os.path.join(os.path.dirname(__file__), 'templates/main.htm')
@@ -45,7 +46,8 @@ class Sell(RequestHandler):
   def _process(self, message=None):
     data = { 
       'message': message,
-      'items': model.Item.all().filter( 'owner =', users.get_current_user() ).fetch(100),
+      'items': model.Item.all().fetch(100),
+      'use_ebay': settings.USE_EBAY
     }
     util.add_user( self.request.uri, data )
     path = os.path.join(os.path.dirname(__file__), 'templates/sell.htm')
@@ -62,9 +64,22 @@ class Sell(RequestHandler):
     else:
       if command == 'add':
         image = self.request.get("image")
-        item = model.Item( owner=user, title=self.request.get("title"), price=long( float(self.request.get("price")) * 100 ), image=db.Blob(image), enabled=True )
+        item = model.Item( 
+          title=self.request.get("title"), 
+          description=self.request.get("description"), 
+          price=long( round( float(self.request.get("price")) * 100 ) ), 
+          available=long( self.request.get("available") ), 
+          image=db.Blob(image), 
+          enabled=True )
         item.put()
-        self._process("The item was added.")
+        if settings.USE_EBAY: # ebay specific
+          add = ebay.Add(item, self.request.host_url)
+          if add.success:
+            self._process("The item was added to the online store and eBay.")
+          else:
+            self._process("The item was added to the online store. An error occurred while adding the item to eBay.")
+        else:
+          self._process("The item was added.")
       else:
         self._process("Unsupported command.")
 
@@ -98,22 +113,17 @@ class Buy(RequestHandler):
       self.response.out.write(template.render(path, data))
 
   def start_purchase(self, item):
-    purchase = model.Purchase( item=item, owner=item.owner, purchaser=users.get_current_user(), status='NEW', secret=util.random_alnum(16) )
+    purchase = model.Purchase( item=item, purchaser=users.get_current_user(), status='NEW', secret=util.random_alnum(16) )
     purchase.put()
     if settings.USE_IPN:
       ipn_url = "%s/ipn/%s/%s/" % ( self.request.host_url, purchase.key(), purchase.secret )
     else:
       ipn_url = None
-    if settings.USE_CHAIN:
-      seller_paypal_email = util.paypal_email(item.owner)
-    else:
-      seller_paypal_email = None
     pay = paypal.Pay( 
       item.price_dollars(), 
       "%sreturn/%s/%s/" % (self.request.uri, purchase.key(), purchase.secret), 
       "%scancel/%s/" % (self.request.uri, purchase.key()), 
       self.request.remote_addr,
-      seller_paypal_email,
       ipn_url,
       shipping=settings.SHIPPING)
 
@@ -171,7 +181,7 @@ class BuyReturn(RequestHandler):
       
       if settings.USE_EMBEDDED:
         data['close_embedded'] = True
-        data['items'] = model.Item.recent()
+        data['items'] = model.Item.forsale()
         path = os.path.join(os.path.dirname(__file__), 'templates/main_embedded.htm')
       else:
         path = os.path.join(os.path.dirname(__file__), 'templates/buy.htm')
@@ -190,7 +200,7 @@ class BuyCancel(RequestHandler):
     util.add_user( self.request.uri, data )
     if settings.USE_EMBEDDED:
       data['close_embedded'] = True
-      data['items'] = model.Item.recent()
+      data['items'] = model.Item.forsale()
       path = os.path.join(os.path.dirname(__file__), 'templates/main_embedded.htm')
     else:
       path = os.path.join(os.path.dirname(__file__), 'templates/buy.htm')
@@ -247,8 +257,11 @@ class IPN (RequestHandler):
         purchase.status_detail = "IPN amounts didn't match. Item price %f. Payment made %f" % ( purchase.item.price_dollars(), ipn.amount )
         purchase.put()
       else:
+        # success
         purchase.status = 'COMPLETED'
         purchase.put()
+        item = purchase.item
+        item.fulfil_web_order()
     else:
       logging.info( "PayPal IPN verify failed: %s" % ipn.error )
       logging.debug( "Request was: %s" % self.request.body )
@@ -256,11 +269,44 @@ class IPN (RequestHandler):
 class SellHistory (RequestHandler):
   def get(self):
     data = {
-      'items': model.Purchase.all().filter( 'owner =', users.get_current_user() ).order('-created').fetch(100),
+      'items': model.Purchase.all().fetch(100),
     }
     util.add_user( self.request.uri, data )
     path = os.path.join(os.path.dirname(__file__), 'templates/sellhistory.htm')
     self.response.out.write(template.render(path, data))
+
+class Notification(RequestHandler):
+  def get(self):
+    self.response.out.write("Nothing to do")
+
+  def post(self):
+    # parse ebay notification
+    notification = ebay.Notification( self.request.body )
+    if notification.success:
+      item = model.Item.all().filter( "ebay_item_id =", notification.item_id )[0]
+      # success - now check item status with ebay
+      order = ebay.Order( item, notification.transaction_id )
+      purchase = model.Purchase.all().filter( "ebay_transaction_id =", notification.transaction_id )
+      if purchase.count() == 0:
+        if order.success:
+          item.fulfil_ebay_order( notification.transaction_id, self.request.host_url )
+          logging.info( 'ebay order was successful' )
+        else:
+          logging.info( 'ebay order could not be verified' )
+      else:
+        logging.info( 'ebay order has duplicate transaction' )
+    else:
+      logging.info( 'ebay notification could not be parsed' )
+    self.response.out.write("Thanks!")
+
+class Configure(RequestHandler):
+  @login_required
+  def get(self):
+    notification = ebay.SetNotifications( enable=settings.USE_EBAY, host_url=self.request.host_url )
+    if notification.success:
+      self.response.out.write("Successfully set ebay notifications to %s" % settings.USE_EBAY)
+    else:
+      self.response.out.write("Failed to set ebay notifications to %s" % settings.USE_EBAY)
 
 class NotFound (RequestHandler):
   def get(self):
@@ -277,6 +323,8 @@ application = webapp.WSGIApplication( [
     ('/profile', Profile),
     ('/ipn/(.*)/(.*)/', IPN),
     ('/sellhistory', SellHistory),
+    ('/notification', Notification),
+    ('/config', Configure),
     ('/.*', NotFound),
   ],
   debug=True)

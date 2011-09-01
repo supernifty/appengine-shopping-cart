@@ -5,7 +5,8 @@
 
 {% block content %}
 <p>
-You wish to buy <strong>{{ item.title }}</strong> for <strong>${{ item.price_dollars|floatformat:2 }}</strong>.
+You wish to buy <strong>{{ item.title }}</strong> for <strong>${{ item.price_dollars|floatformat:2 }}</strong><br/>
+{{ item.description }}
 <form action="/buy/{{ item.key }}/" method="post">
   <input type="submit" value="Buy Now"/>
 </form>

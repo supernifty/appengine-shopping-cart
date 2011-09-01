@@ -14,10 +14,20 @@ PAYPAL_EMAIL = '*** REQUIRED ***'
 
 PAYPAL_COMMISSION = 0.2 # 20%
 
-USE_CHAIN = False
 USE_IPN = False
 USE_EMBEDDED = False
 SHIPPING = False # not yet working properly; PayPal bug
 
 # EMBEDDED_ENDPOINT = 'https://paypal.com/webapps/adaptivepayment/flow/pay'
 EMBEDDED_ENDPOINT = 'https://www.sandbox.paypal.com/webapps/adaptivepayment/flow/pay'
+
+# ebay settings
+USE_EBAY = True
+EBAY_DEVID = '*** YOUR EBAY DEVID ***'
+EBAY_APPID = '*** YOUR EBAY APPID ***'
+EBAY_CERTID = '*** YOUR EBAY CERTID ***'
+EBAY_AUTHTOKEN = '*** YOUR EBAY TOKEN ***'
+
+EBAY_ENDPOINT = 'https://api.sandbox.ebay.com/ws/api.dll' # sandbox
+#EBAY_ENDPOINT = 'https://api.ebay.com/ws/api.dll' # live
+

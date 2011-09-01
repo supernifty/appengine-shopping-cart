@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<SetNotificationPreferencesRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+  <RequesterCredentials>
+    <eBayAuthToken>{{ ebay_token }}</eBayAuthToken>
+  </RequesterCredentials>
+  <Version>731</Version>
+  <ApplicationDeliveryPreferences>
+    <ApplicationEnable>Enable</ApplicationEnable>
+    <ApplicationURL>{{ notification_url }}</ApplicationURL>
+    <DeviceType>Platform</DeviceType>
+  </ApplicationDeliveryPreferences>
+  <UserDeliveryPreferenceArray>
+    <NotificationEnable>
+      <EventType>ItemClosed</EventType>
+      <EventEnable>{{ enable }}</EventEnable>
+    </NotificationEnable>
+    <NotificationEnable>
+      <EventType>ItemSold</EventType>
+      <EventEnable>{{ enable }}</EventEnable>
+    </NotificationEnable>
+  </UserDeliveryPreferenceArray>
+</SetNotificationPreferencesRequest>

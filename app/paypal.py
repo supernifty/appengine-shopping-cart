@@ -14,7 +14,7 @@ from django.utils import simplejson as json
 import settings
 
 class Pay( object ):
-  def __init__( self, amount, return_url, cancel_url, remote_address, secondary_receiver=None, ipn_url=None, shipping=False ):
+  def __init__( self, amount, return_url, cancel_url, remote_address, ipn_url=None, shipping=False ):
     headers = {
       'X-PAYPAL-SECURITY-USERID': settings.PAYPAL_USERID, 
       'X-PAYPAL-SECURITY-PASSWORD': settings.PAYPAL_PASSWORD, 
@@ -37,15 +37,7 @@ class Pay( object ):
     else:
       data['actionType'] = 'PAY'
 
-    if secondary_receiver == None: # simple payment
-      data['receiverList'] = { 'receiver': [ { 'email': settings.PAYPAL_EMAIL, 'amount': '%f' % amount } ] }
-    else: # chained
-      commission = amount * settings.PAYPAL_COMMISSION
-      data['receiverList'] = { 'receiver': [ 
-          { 'email': settings.PAYPAL_EMAIL, 'amount': '%0.2f' % amount, 'primary': 'true' },
-          { 'email': secondary_receiver, 'amount': '%0.2f' % ( amount - commission ), 'primary': 'false' },
-        ] 
-      }
+    data['receiverList'] = { 'receiver': [ { 'email': settings.PAYPAL_EMAIL, 'amount': '%f' % amount } ] }
 
     if ipn_url != None:
       data['ipnNotificationUrl'] = ipn_url
