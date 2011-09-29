@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AddItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+  <ErrorLanguage>en_US</ErrorLanguage>
+  <WarningLevel>High</WarningLevel>
+  <Item>
+    <Title>{{ title }}</Title>
+    <Description>{{ description }}</Description>
+    <PrimaryCategory>
+      <CategoryID>{{ category }}</CategoryID>
+    </PrimaryCategory>
+    <StartPrice>{{ price }}</StartPrice>
+    <ConditionID>1000</ConditionID>
+    <CategoryMappingAllowed>true</CategoryMappingAllowed>
+    <Country>US</Country>
+    <Currency>USD</Currency>
+    <DispatchTimeMax>3</DispatchTimeMax>
+    <ListingDuration>Days_7</ListingDuration>
+    <ListingType>FixedPriceItem</ListingType>
+    <PaymentMethods>PayPal</PaymentMethods>
+    <PayPalEmailAddress>{{ paypal_email }}</PayPalEmailAddress>
+    <PictureDetails>
+      <PictureURL>{{ image_url }}</PictureURL>
+    </PictureDetails>
+    <PostalCode>95125</PostalCode>
+    <Quantity>1</Quantity>
+    <ReturnPolicy>
+      <ReturnsAcceptedOption>ReturnsAccepted</ReturnsAcceptedOption>
+      <RefundOption>MoneyBack</RefundOption>
+      <ReturnsWithinOption>Days_30</ReturnsWithinOption>
+      <Description>Returns will be evaluated on an individual basis</Description>
+      <ShippingCostPaidByOption>Buyer</ShippingCostPaidByOption>
+    </ReturnPolicy>
+    <ShippingDetails>
+      <ShippingType>Flat</ShippingType>
+      <ShippingServiceOptions>
+        <ShippingServicePriority>1</ShippingServicePriority>
+        <ShippingService>USPSMedia</ShippingService>
+        <ShippingServiceCost>2.50</ShippingServiceCost>
+      </ShippingServiceOptions>
+    </ShippingDetails>
+    <Site>US</Site>
+    <UUID>{{ uuid }}</UUID>
+  </Item>
+  <RequesterCredentials>
+    <eBayAuthToken>{{ ebay_token }}</eBayAuthToken>
+  </RequesterCredentials>
+</AddItemRequest>
