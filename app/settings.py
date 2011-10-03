@@ -31,3 +31,6 @@ EBAY_AUTHTOKEN = '*** YOUR EBAY TOKEN ***'
 EBAY_ENDPOINT = 'https://api.sandbox.ebay.com/ws/api.dll' # sandbox
 #EBAY_ENDPOINT = 'https://api.ebay.com/ws/api.dll' # live
 
+EBAY_FIND_ENDPOINT = 'http://svcs.sandbox.ebay.com/services/search/FindingService/v1' # sandbox
+#EBAY_FIND_ENDPOINT = 'http://svcs.ebay.com/services/search/FindingService/v1' # live
+USE_EBAY_PRICER = False

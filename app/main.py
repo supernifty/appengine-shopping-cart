@@ -3,6 +3,8 @@ import decimal
 import logging
 import os
 import random
+import simplejson
+import urllib
 
 from google.appengine.api import users
 from google.appengine.ext import db
@@ -47,7 +49,8 @@ class Sell(RequestHandler):
     data = { 
       'message': message,
       'items': model.Item.all().fetch(100),
-      'use_ebay': settings.USE_EBAY
+      'use_ebay': settings.USE_EBAY,
+      'use_ebay_pricer': settings.USE_EBAY_PRICER
     }
     util.add_user( self.request.uri, data )
     path = os.path.join(os.path.dirname(__file__), 'templates/sell.htm')
@@ -308,6 +311,19 @@ class Configure(RequestHandler):
     else:
       self.response.out.write("Failed to set ebay notifications to %s" % settings.USE_EBAY)
 
+class API(RequestHandler):
+  @login_required
+  def get(self, cmd, data):
+    if cmd == 'find':
+      find = ebay.Find( urllib.unquote( data ) )
+      if find.success:
+        #self.response.out.write( find.raw_response )
+        self.response.out.write( simplejson.dumps( find.prices ) )
+      else:
+        self.error(501)
+    else:
+      self.error(501)
+
 class NotFound (RequestHandler):
   def get(self):
     self.error(404)
@@ -325,6 +341,7 @@ application = webapp.WSGIApplication( [
     ('/sellhistory', SellHistory),
     ('/notification', Notification),
     ('/config', Configure),
+    ('/api/(.*)/(.*)', API),
     ('/.*', NotFound),
   ],
   debug=True)

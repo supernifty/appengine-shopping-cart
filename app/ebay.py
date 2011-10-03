@@ -149,6 +149,33 @@ class Order(object):
     logging.info( 'ebay response: ' + self.raw_response )
     self.success = self.raw_response.find( "<eBayPaymentStatus>NoPaymentFailure</eBayPaymentStatus>" )
 
+class Find(object):
+  '''find items by keyword'''
+  def __init__(self, keywords):
+    headers = {
+      'X-EBAY-SOA-SERVICE-NAME': 'FindingService',
+      'X-EBAY-SOA-OPERATION-NAME': 'findItemsAdvanced',
+      'X-EBAY-SOA-REQUEST-DATA-FORMAT': 'XML',
+      'X-EBAY-SOA-RESPONSE-DATA-FORMAT': 'XML',
+      'X-EBAY-SOA-SECURITY-APPNAME': settings.EBAY_APPID,
+      'X-EBAY-SOA-SERVICE-VERSION': '1.0.0',
+      'X-EBAY-SOA-GLOBAL-ID': 'EBAY-US'
+    }
+
+    data = {
+      'keywords': keywords
+    }
+    template_path = os.path.join(os.path.dirname(__file__), 'templates/ebay_find.xml')
+    self.raw_request = template.render(template_path, data)
+    logging.info( 'ebay request: ' + self.raw_request )
+    self.raw_response = url_request( settings.EBAY_FIND_ENDPOINT, data=self.raw_request, headers=headers ).content()
+    logging.info( 'ebay response: ' + self.raw_response )
+    # extract list of prices
+    fixed_prices = re.findall( "<convertedCurrentPrice[^>]*>([0-9.]*)</convertedCurrentPrice>", self.raw_response )
+    buynow_prices = re.findall( "<convertedBuyItNowPrice[^>]*>([0-9.]*)</convertedBuyItNowPrice>", self.raw_response )
+    self.prices = fixed_prices + buynow_prices
+    self.success = self.raw_response.find( "<ack>Success</ack>" )
+
 class SetNotifications(object):
   '''register to receive (or not receive) eBay notifications'''
   def __init__(self, enable, host_url):

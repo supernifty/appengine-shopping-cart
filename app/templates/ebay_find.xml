@@ -1,0 +1,9 @@
+<findItemsAdvancedRequest xmlns="http://www.ebay.com/marketplace/search/v1/services">
+  <keywords>"{{ keywords }}"</keywords>
+  <descriptionSearch>true</descriptionSearch>
+  <itemFilter>
+    <name>ListingType</name>
+    <value>FixedPrice</value>
+    <value>AuctionWithBIN</value>
+  </itemFilter>
+</findItemsAdvancedRequest>

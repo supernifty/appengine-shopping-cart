@@ -3,6 +3,15 @@
 {% block title %}Sell an item{% endblock %}
 {% block heading %}Sell an item{% endblock %}
 
+{% block head %}
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script src="/static/main.js"></script>
+<script type="text/javascript">
+  supernifty.init();
+</script>
+{% endblock %}
+
 {% block content %}
 <p>{{ items|length }} item{{ items|length|pluralize }} for sale.</p>
 <p>
@@ -16,16 +25,21 @@
 <strong>Add an item to sell</strong>
 <br/>
 <form action="/sell/add/" method="post" enctype="multipart/form-data">
-  <label for="title">Title:&nbsp; </label><input type="text" name="title"/><br/>
+  <label for="title">Title:&nbsp; </label><input type="text" name="title" id="title"/><br/>
   <label for="description">Description:&nbsp; </label><input type="text" name="description"/><br/>
-  <label for="price">Price:&nbsp; </label><input type="text" name="price"/><br/>
+  <label for="price">Price:&nbsp; </label><input type="text" name="price" id="price"/><br/>
   <label for="image">Image:&nbsp; </label><input type="file" name="image"/><br/>
   <label for="available">Available:&nbsp; </label><input type="text" name="available"/><br/>
 {% if use_ebay %}
-  <strong>eBay</strong><br/>
+  <p>This item will also be listed on eBay</p>
+{% endif %}
+{% if use_ebay_pricer %}
+  <p><a onclick="supernifty.prices(); return false" href="/nojs">Generate Price Data</a></p>
 {% endif %}
   <input type="submit" value="Add Item"/>
 </form>
+  <div id="ebay_data">
+  </div>
 </div>
 <p><a href="/sellhistory">Sales</a></p>
 {% endblock %}
