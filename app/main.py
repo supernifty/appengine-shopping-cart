@@ -321,6 +321,16 @@ class API(RequestHandler):
         self.response.out.write( simplejson.dumps( find.prices ) )
       else:
         self.error(501)
+    elif cmd == 'ccy':
+      conversion = paypal.Currency( 
+        data,
+        [ 'AUD', 'CAD', 'GBP', 'EUR' ],
+        self.request.remote_addr
+      )
+      if conversion.success():
+        self.response.out.write( simplejson.dumps( conversion.response ) )
+      else:
+        self.error(501)
     else:
       self.error(501)
 
@@ -341,7 +351,7 @@ application = webapp.WSGIApplication( [
     ('/sellhistory', SellHistory),
     ('/notification', Notification),
     ('/config', Configure),
-    ('/api/(.*)/(.*)', API),
+    ('/api/([^/]*)/(.*)', API),
     ('/.*', NotFound),
   ],
   debug=True)

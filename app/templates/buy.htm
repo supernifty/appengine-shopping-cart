@@ -3,12 +3,18 @@
 {% block title %}Buy {{ item.title }}{% endblock %}
 {% block heading %}Buy {{ item.title }}{% endblock %}
 
+{% block head %}
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
+<script src="/static/main.js"></script>
+{% endblock %}
+
 {% block content %}
 <p>
-You wish to buy <strong>{{ item.title }}</strong> for <strong>${{ item.price_dollars|floatformat:2 }}</strong><br/>
+You wish to buy <strong>{{ item.title }}</strong> for <strong>$<span id="amount">{{ item.price_dollars|floatformat:2 }}</span></strong><br/>
 {{ item.description }}
 <form action="/buy/{{ item.key }}/" method="post">
   <input type="submit" value="Buy Now"/>
 </form>
+<div id="ccy_data"><a onclick="supernifty.currencies(); return false" href="/nojs">Click to see this converted to other currencies!</a></div>
 </p>
 {% endblock %}

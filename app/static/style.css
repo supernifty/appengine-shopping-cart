@@ -25,3 +25,9 @@ label {
   width: 5em;
   float: left;
 }
+
+#ccy_data {
+  border: 1px solid black;
+  background-color: white;
+  padding: 8px;
+}

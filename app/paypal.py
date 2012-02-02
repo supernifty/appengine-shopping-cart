@@ -128,6 +128,32 @@ class ShippingAddress( object ):
     logging.debug( "response was: %s" % self.raw_response )
     self.response = json.loads( self.raw_response )
 
+class Currency( object ):
+  def __init__( self, amount, currencies, remote_address ):
+    headers = {
+      'X-PAYPAL-SECURITY-USERID': settings.PAYPAL_USERID, 
+      'X-PAYPAL-SECURITY-PASSWORD': settings.PAYPAL_PASSWORD, 
+      'X-PAYPAL-SECURITY-SIGNATURE': settings.PAYPAL_SIGNATURE, 
+      'X-PAYPAL-REQUEST-DATA-FORMAT': 'JSON',
+      'X-PAYPAL-RESPONSE-DATA-FORMAT': 'JSON',
+      'X-PAYPAL-APPLICATION-ID': settings.PAYPAL_APPLICATION_ID,
+      'X-PAYPAL-DEVICE-IPADDRESS': remote_address,
+    }
+
+    data = {
+      'requestEnvelope': { 'errorLanguage': 'en_US' },
+      'baseAmountList': [ { 'currency': { 'code': 'USD', 'amount': amount } } ],
+      'convertToCurrencyList': { 'currencyCode': currencies },
+    } 
+
+    self.raw_request = json.dumps(data)
+    self.raw_response = url_request( "%s%s" % ( settings.PAYPAL_ENDPOINT, "ConvertCurrency" ), data=self.raw_request, headers=headers ).content() 
+    logging.info( "response was: %s" % self.raw_response )
+    self.response = json.loads( self.raw_response )
+
+  def success( self ):
+    return self.raw_response.find( "Success" ) != -1
+
 class url_request( object ): 
   '''wrapper for urlfetch'''
   def __init__( self, url, data=None, headers={} ):

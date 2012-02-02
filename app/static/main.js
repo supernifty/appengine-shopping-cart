@@ -9,7 +9,23 @@ var supernifty = function() {
     }
   }
 
-  function success(data) {
+  function ccy_success(data) {
+    var 
+      target = document.getElementById("ccy_data"),
+      currencies = $.parseJSON( data ),
+      list = currencies['estimatedAmountTable']['currencyConversionList'][0]['currencyList']['currency'],
+      map = { 'AUD': 'au', 'CAD': 'ca', 'GBP': 'gb', 'EUR': 'europeanunion' },
+      result = 'Expect to pay...<br/>'; 
+    for ( var i = 0; i < list.length; i++ ) {
+      if ( list[i]['code'] in map ) {
+        result += '<img alt="' + list[i]['code'] + '" src="/static/flags/' + map[list[i]['code']] + '.png"/> ';
+      }
+      result += list[i]['amount'] + ' ' + list[i]['code'] + '&nbsp;&nbsp;&nbsp;&nbsp;';
+    }
+    target.innerHTML = result;
+  }
+
+  function ebay_success(data) {
     var 
       target = document.getElementById("ebay_data"),
       prices = $.parseJSON( data ),
@@ -71,7 +87,15 @@ var supernifty = function() {
         url = '/api/find/' + encodeURIComponent(title),
         target = document.getElementById("ebay_data");
       target.innerHTML = 'Please wait...';
-      $.get( url, success );
+      $.get( url, ebay_success );
+    },
+
+    currencies: function() {
+      var amount = document.getElementById("amount").innerHTML,
+        url = '/api/ccy/' + encodeURIComponent(amount),
+        target = document.getElementById("ccy_data");
+      target.innerHTML = 'Please wait...';
+      $.get( url, ccy_success );
     }
   }
 }();
